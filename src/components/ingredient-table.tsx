@@ -25,6 +25,8 @@ import {
 import { GrocyUnitCombobox } from "~/components/grocy-unit-combobox"
 import { IngredientGroupCombobox } from "~/components/ingredient-group-combobox"
 import { IngredientNoteDialog } from "~/components/ingredient-note-dialog"
+import { IngredientAnyAmountCheckbox } from "~/components/ingredient-any-amount-checkbox"
+import { IngredientVariableAmountDialog } from "~/components/ingredient-variable-amount-dialog"
 
 import { GrocyProductCombobox } from "./grocy-product-combobox"
 
@@ -56,6 +58,8 @@ export function IngredientTable({ grocyBaseUrl }: IngredientTableProps) {
             <TableHead>Unit</TableHead>
             <TableHead>Group</TableHead>
             <TableHead>Note</TableHead>
+            <TableHead>Check any Amount</TableHead>
+            <TableHead>Variable Amount</TableHead>
             <TableHead>Ignore</TableHead>
           </TableRow>
         </TableHeader>
@@ -148,7 +152,15 @@ const IngredientTableRow = ({
               <GrocyUnitCombobox
                 disabled={isRowIgnored}
                 value={field.value}
-                setValue={field.onChange}
+                setValue={(a) => {
+                  field.onChange(a)
+                  const prod = products
+                    ? products.find((b) => b.id === f.getValues(`ingredients.${index}.productId`))
+                    : undefined
+                  if (prod && prod.qu_id_stock !== a) {
+                      f.setValue(`ingredients.${index}.anyAmount`, true)
+                  }
+                }}
               />
               <FormMessage />
             </>
@@ -185,6 +197,7 @@ const IngredientTableRow = ({
                   variant="outline"
                   data-has-note={field.value && field.value.trim().length > 0}
                   className="data-[has-note=true]:bg-green-200"
+                  disabled={isRowIgnored || (products && !products.length)}
                 >
                   <SquarePen strokeWidth={1} className={"size-4"} />
                 </Button>
@@ -192,6 +205,42 @@ const IngredientTableRow = ({
             )
           }}
           name={`ingredients.${index}.note`}
+          control={f.control}
+        />
+      </TableCell>
+      <TableCell>
+        <Controller
+          render={({ field }) => {
+            return (
+              <IngredientAnyAmountCheckbox
+                disabled={isRowIgnored || (products && !products.length)}
+                checked={field.value}
+                setValue={field.onChange}
+              />
+            )
+          }}
+          name={`ingredients.${index}.anyAmount`}
+          control={f.control}
+        />
+      </TableCell>
+      <TableCell>
+        <Controller
+          render={({ field }) => {
+            return (
+              <IngredientVariableAmountDialog {...field}>
+                <Button
+                  size="icon"
+                  variant="outline"
+                  data-has-variable-amount={field.value && field.value.trim().length > 0}
+                  className="data-[has-variable-amount=true]:bg-green-200"
+                  disabled={isRowIgnored || (products && !products.length)}
+                >
+                  <SquarePen strokeWidth={1} className={"size-4"} />
+                </Button>
+              </IngredientVariableAmountDialog>
+            )
+          }}
+          name={`ingredients.${index}.variableAmount`}
           control={f.control}
         />
       </TableCell>

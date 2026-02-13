@@ -13,6 +13,8 @@ const UnignoredIngredientSchema = z.object({
   ignored: z.literal(false),
   note: z.string().trim().optional(),
   group: z.string().trim().optional(),
+  anyAmount: z.boolean(),
+  variableAmount: z.string().optional(),
 })
 
 export type UnignoredIngredient = z.infer<typeof UnignoredIngredientSchema>

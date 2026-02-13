@@ -87,7 +87,7 @@ export const createRecipeInGrocyProcedure = protectedProcedure
       if (!grocyProduct) continue
 
       const useAnyUnit: "1" | "0" =
-        ingredient.unitId === grocyProduct.qu_id_stock ? "0" : "1"
+        ingredient.unitId === grocyProduct.qu_id_stock || !ingredient.anyAmount ? "0" : "1"
 
       const body = {
         recipe_id: recipeId,
@@ -97,6 +97,7 @@ export const createRecipeInGrocyProcedure = protectedProcedure
         only_check_single_unit_in_stock: useAnyUnit,
         note: ingredient.note,
         ingredient_group: ingredient.group,
+        variable_amount: ingredient.variableAmount || null,
       }
 
       const ingredientResponse = await grocyFetch("/objects/recipes_pos", {
